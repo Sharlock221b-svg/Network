@@ -1,16 +1,18 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 class User(AbstractUser):
     """Contains name, dob, about, img(url), followers(int), following(int)."""
     name = models.CharField(max_length=100,blank=True)
     dob = models.DateField(blank=True,null=True)
     about = models.TextField(max_length=1000,blank=True)
-    img = models.URLField(blank=True)
+    img = models.URLField(default="https://t4.ftcdn.net/jpg/02/66/60/17/360_F_266601726_NCXy2AIRecYluwp5BUKOXQAWo35Seilr.jpg")
     followers = models.IntegerField(default=0)
     following = models.IntegerField(default=0)
     def __str__(self):
         return f"{self.username} created"
+
 
 class Post(models.Model):
     """Contains user, time(auto_now_add), content, likes"""
@@ -21,6 +23,7 @@ class Post(models.Model):
 
     def __str__(self):
         return f"{self.user} created a post."
+
 
 class Following(models.Model):
     """follower -> followed"""

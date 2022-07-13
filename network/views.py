@@ -1,15 +1,26 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-
+from django import forms
 from .models import User, Post
+import json
 
 
 def index(request):
+   if request.method == "POST":
+      content = request.POST["tweet"]
+      user_id = request.POST["user_id"]
+      user = User.objects.get(id=user_id)
+      q = Post(user=user,content=content)
+      q.save()
+      return render(request, "network/index.html", {
+        "posts": Post.objects.all().order_by("-time")
+      })
+   else:
     return render(request, "network/index.html", {
-        "posts": Post.objects.all()
+        "posts": Post.objects.all().order_by("-time")
     })
 
 
@@ -63,3 +74,8 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+def profile(request,id):
+    print(id)
+    pass

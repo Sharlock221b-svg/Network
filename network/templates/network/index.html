@@ -22,6 +22,7 @@
     border-radius: 22px;
     cursor: pointer;
     min-height: 35px;
+    height: 40px;
   }
 
   .heart-icon {
@@ -41,6 +42,13 @@
   .btn{
     margin-right: 7px;
   }
+  a{
+    text-decoration: none;
+    cursor: pointer;
+  }
+  a:hover{
+    color: #EA9115;
+  }
 </style>
 {% endblock %} {% block body %}
 
@@ -49,26 +57,30 @@
     <div class="col-md-8">
         
     {% if user.is_authenticated %}
-    <form>
+    <form method="post" id="post_tweet" action="/">
       {% csrf_token %}
       <div
         class="d-flex flex-row align-items-center add-comment p-2 bg-white rounded"
       >
+        <input type="hidden" value="{{ user.id }}"  name="user_id">
         <img
-          class="rounded-circle"
+          class="img-rounded"
           src="{{ user.img }}"
-          width="40"
-        /><input
+          width="90"
+        /><textarea
           type="text"
           class="form-control border-0 no-box-shadow ml-1"
           placeholder="Tweet what's on your mind?"
-        />
-        <button type="button" class="btn btn-primary">Tweet</button>
+          max-length="1000"
+          min-length="2"
+          name="tweet"
+        ></textarea>
+        <input type="submit" class="btn btn-primary" value="Post">
       </div>
     </form>
     {% endif %}
 
-
+    
       {% for post in posts %}
    
       <div class="p-3 bg-white mt-2 rounded">
@@ -79,10 +91,11 @@
               src="{{ post.user.img }}"
               width="40"
             />
-            <div class="d-flex flex-column ml-2">
-              <span class="font-weight-bold"><h4>{{ post.user.username }}</h4></span
+            <a href="{% url 'profile'  post.user.id %}" class="text-decoration-none"><div class="d-flex flex-column ml-2">
+              <span class="ont-weight-bold"><h4>{{ post.user.username }}</h4></span
               >
             </div>
+             </a>
           </div>
           <div class="d-flex align-items-center px-3 heart border">
             <i class="fa fa-heart-o heart-icon">
@@ -108,15 +121,16 @@
         </div>
         <div class="d-flex p-2 bd-highlight justify-content-between" style="margin-top: 30px;">
         <span style="font-size: 16px;">{{ post.time }}</span>
+        {% if user.id == post.user.id %}
         <div >
-        <button type="button" class="btn btn-danger">Delete</button>
         <button type="button" class="btn btn-dark">Edit</button>
         </div>
+        {% endif %}
         </div>
       </div>
       {% endfor %}
     </div>
   </div>
 </div>
-
 {% endblock %}
+
