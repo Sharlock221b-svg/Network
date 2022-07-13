@@ -1,34 +1,122 @@
-{% extends "network/layout.html" %}
+{% extends "network/layout.html" %} {% block style %}
+<style>
+  body {
+    background: #c8e6c9;
+  }
 
-{% block body %}
+  .no-box-shadow {
+    box-shadow: none;
+  }
+
+  .no-box-shadow:focus {
+    box-shadow: none;
+  }
+
+  .day {
+    font-size: 9px;
+  }
+
+  .heart {
+    border: 1px soild green !important;
+    border-color: green !important;
+    border-radius: 22px;
+    cursor: pointer;
+    min-height: 35px;
+  }
+
+  .heart-icon {
+    color: green;
+  }
+
+  .comment-text {
+    font-size: 18px;
+    margin-top: 8px;
+  }
+
+  .delete {
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .btn{
+    margin-right: 7px;
+  }
+</style>
+{% endblock %} {% block body %}
 
 <div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-center row">
-        <div class="col-md-8">
+  <div class="d-flex justify-content-center row">
+    <div class="col-md-8">
+        
+    {% if user.is_authenticated %}
+    <form>
+      {% csrf_token %}
+      <div
+        class="d-flex flex-row align-items-center add-comment p-2 bg-white rounded"
+      >
+        <img
+          class="rounded-circle"
+          src="{{ user.img }}"
+          width="40"
+        /><input
+          type="text"
+          class="form-control border-0 no-box-shadow ml-1"
+          placeholder="Tweet what's on your mind?"
+        />
+        <button type="button" class="btn btn-primary">Tweet</button>
+      </div>
+    </form>
+    {% endif %}
 
-            <div class="d-flex flex-row align-items-center add-comment p-2 bg-white rounded"><img class="rounded-circle" src="https://i.imgur.com/QvDFBCC.jpg" width="40"><input type="text" class="form-control border-0 no-box-shadow ml-1" placeholder="Leave a constructive comment..."></div>
 
-
-            <div class="p-3 bg-white mt-2 rounded">
-
-                <div class="d-flex justify-content-between">
-                    <div class="d-flex flex-row user"><img class="rounded-circle img-fluid img-responsive" src="https://i.imgur.com/JXZLwEY.jpg" width="40">
-                        <div class="d-flex flex-column ml-2"><span class="font-weight-bold">@Samantha</span><span class="day">2 days ago</span></div>
-                    </div>
-                    <div class="d-flex align-items-center px-3 heart border"><i class="fa fa-heart-o heart-icon"></i><span class="ml-2">35</span></div>
-                </div>
-                <div class="comment-text text-justify mt-2">
-                    <p >Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-                </div>
-
-                <div class="d-flex justify-content-end align-items-center comment-buttons mt-2 text-right"><span class="mr-3 delete">Delete</span><button class="btn btn-success btn-sm border-0 px-3" type="button">Edit</button></div>
-
+      {% for post in posts %}
+   
+      <div class="p-3 bg-white mt-2 rounded">
+        <div class="d-flex justify-content-between">
+          <div class="d-flex flex-row user">
+            <img
+              class="rounded-circle img-fluid img-responsive"
+              src="{{ post.user.img }}"
+              width="40"
+            />
+            <div class="d-flex flex-column ml-2">
+              <span class="font-weight-bold"><h4>{{ post.user.username }}</h4></span
+              >
             </div>
-            
+          </div>
+          <div class="d-flex align-items-center px-3 heart border">
+            <i class="fa fa-heart-o heart-icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="bi bi-heart"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"
+                />
+              </svg> </i
+            ><span class="ml-2">{{ post.likes }}</span>
+          </div>
         </div>
+        <div class="comment-text text-justify mt-2">
+          <p>
+           {{ post.content }}
+          </p>
+        </div>
+        <div class="d-flex p-2 bd-highlight justify-content-between" style="margin-top: 30px;">
+        <span style="font-size: 16px;">{{ post.time }}</span>
+        <div >
+        <button type="button" class="btn btn-danger">Delete</button>
+        <button type="button" class="btn btn-dark">Edit</button>
+        </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
+  </div>
 </div>
 
-    
 {% endblock %}
-
