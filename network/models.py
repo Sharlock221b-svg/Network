@@ -12,7 +12,7 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} created"
 
-class Posts(models.Model):
+class Post(models.Model):
     """Contains user, time(auto_now_add), content, likes"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="all_posts")
     time = models.DateTimeField(auto_now_add=True)
@@ -24,8 +24,8 @@ class Posts(models.Model):
 
 class Following(models.Model):
     """follower -> followed"""
-    follower = models.ForeignKey(User, on_delete=models.CASCADE)
-    followed = models.ForeignKey(User, on_delete=models.CASCADE)
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="get_followers")
+    followed = models.ForeignKey(User, on_delete=models.CASCADE, related_name="get_followed")
     
     def __str__(self):
         return f"{self.follower} follows {self.followed}."
