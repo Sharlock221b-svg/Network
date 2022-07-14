@@ -4,8 +4,9 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django import forms
-from .models import User, Post
+from .models import Following, User, Post
 import json
+from django.contrib.auth.decorators import login_required
 
 
 def index(request):
@@ -76,6 +77,45 @@ def register(request):
         return render(request, "network/register.html")
 
 
+
+@login_required(login_url="login")
 def profile(request,id):
-    print(id)
-    pass
+
+    if request.method == "POST":
+        res = request.POST["res"]
+        profile = User.objects.get(pk=id)
+        posts = Post.objects.filter(user=profile)
+        current_user = User.objects.get(pk=request.user.id)
+
+        if res == "follow":
+           q = Following(follower=request.user,followed=profile)
+           q.save()
+           profile.followers += 1
+           profile.save()
+           current_user.following += 1
+           current_user.save()
+        else:
+            Following.objects.filter(follower=request.user,followed=profile).delete()
+            profile.followers -= 1
+            profile.save()
+            current_user.following -= 1
+            current_user.save()
+        return HttpResponseRedirect(reverse("profile", args=(id,)))
+ 
+
+    else:
+         profile = User.objects.get(pk=id)
+         posts = Post.objects.filter(user=profile)
+         print(posts)
+
+         q = Following.objects.filter(follower=request.user,followed=profile)
+         if len(q) >= 1:
+            val = True
+         else:
+            val = False
+
+         return render(request, "network/profile.html",{
+          "profile": profile,
+          "posts": posts,
+          "val": val
+         })
