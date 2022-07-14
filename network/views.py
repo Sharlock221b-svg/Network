@@ -1,3 +1,4 @@
+from distutils.log import error
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -78,7 +79,6 @@ def register(request):
 
 
 
-@login_required(login_url="login")
 def profile(request,id):
 
     if request.method == "POST":
@@ -107,15 +107,31 @@ def profile(request,id):
          profile = User.objects.get(pk=id)
          posts = Post.objects.filter(user=profile)
          print(posts)
+         val = False
 
-         q = Following.objects.filter(follower=request.user,followed=profile)
-         if len(q) >= 1:
-            val = True
-         else:
-            val = False
-
+         try:
+            q = Following.objects.filter(follower=request.user,followed=profile)
+            if len(q) >= 1:
+               val = True
+            else:
+               val = False
+         except: 
+             print("error")
+            
          return render(request, "network/profile.html",{
           "profile": profile,
           "posts": posts,
           "val": val
          })
+
+
+def following(request):
+    list_users = Following.objects.filter(follower=request.user)
+    list = []
+    for x in list_users:
+        list.append(x.followed)
+
+    post = Post.objects.filter(user__in=list)
+    return render(request, "network/posts.html", {
+        "posts": post
+    })
