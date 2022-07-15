@@ -11,8 +11,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView
 
 
-
-
 def index(request):
    if request.method == "POST":
       content = request.POST["tweet"]
@@ -23,7 +21,7 @@ def index(request):
       return HttpResponseRedirect(reverse("index"))
    else:
      posts = Post.objects.all().order_by("-time")
-     paginator = Paginator(posts, 4)
+     paginator = Paginator(posts, 10)
      page_number = request.GET.get('page')
      page_obj = paginator.get_page(page_number)
      return render(request, "network/index.html", {
@@ -122,10 +120,14 @@ def profile(request,id):
                val = False
          except: 
              print("error")
+
+         paginator = Paginator(posts, 10)
+         page_number = request.GET.get('page')
+         page_obj = paginator.get_page(page_number)    
             
          return render(request, "network/profile.html",{
           "profile": profile,
-          "posts": posts,
+          "posts": page_obj,
           "val": val
          })
 
@@ -137,6 +139,9 @@ def following(request):
         list.append(x.followed)
 
     post = Post.objects.filter(user__in=list)
+    paginator = Paginator(post, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     return render(request, "network/posts.html", {
-        "posts": post
+        "posts": page_obj
     })
