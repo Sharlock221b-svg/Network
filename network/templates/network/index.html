@@ -75,8 +75,8 @@
           type="text"
           class="form-control border-0 no-box-shadow ml-1"
           placeholder="Tweet what's on your mind?"
-          max-length="1000"
-          min-length="2"
+          maxlength="1000"
+          minlength="2"
           name="tweet"
         ></textarea>
         <input type="submit" class="btn btn-primary" value="Post">
@@ -118,18 +118,33 @@
             ><span class="ml-2">{{ post.likes }}</span>
           </div>
         </div>
+
         <div class="comment-text text-justify mt-2">
-          <p>
+          <p id="{{ post.id }}content">
            {{ post.content }}
           </p>
+          <textarea type="text"
+          class="form-control ml-1" id="{{ post.id }}edit-content"
+          style="display: none;">{{ post.content }}</textarea>
         </div>
         <div class="d-flex p-2 bd-highlight justify-content-between" style="margin-top: 30px;">
         <span style="font-size: 16px;">{{ post.time }}</span>
+
         {% if user.id == post.user.id %}
-        <div >
-        <button type="button" class="btn btn-dark">Edit</button>
+        <div id="{{ post.id }}edit">
+        <button type="button" class="btn btn-dark" id="edit-button" value="{{ post.id }}" >Edit</button>
         </div>
+
+        <div id="{{ post.id }}save" style="display: none;">
+          <form id="edit-form">
+            {% csrf_token %}
+            <input type="hidden" value="{{ post.id }}" id="post_id">
+            <button type="submit" class="btn btn-success">Save</button>
+          </form>
+        </div>
+
         {% endif %}
+
         </div>
       </div>
       {% endfor %}

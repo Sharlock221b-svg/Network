@@ -9,6 +9,8 @@ from .models import Following, User, Post
 import json
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView
+import requests
+import json
 
 
 def index(request):
@@ -108,7 +110,7 @@ def profile(request,id):
 
     else:
          profile = User.objects.get(pk=id)
-         posts = Post.objects.filter(user=profile)
+         posts = Post.objects.filter(user=profile).order_by("-time")
          print(posts)
          val = False
 
@@ -145,3 +147,10 @@ def following(request):
     return render(request, "network/posts.html", {
         "posts": page_obj
     })
+
+def savePost(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        Post.objects.filter(id=data["post_id"]).update(content=data["content"])
+        return HttpResponse("Updated Successfully", status=200)
+    
