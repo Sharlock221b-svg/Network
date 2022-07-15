@@ -1,13 +1,16 @@
-from distutils.log import error
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse
 from django import forms
 from .models import Following, User, Post
 import json
 from django.contrib.auth.decorators import login_required
+from django.views.generic import ListView
+
+
 
 
 def index(request):
@@ -17,13 +20,15 @@ def index(request):
       user = User.objects.get(id=user_id)
       q = Post(user=user,content=content)
       q.save()
-      return render(request, "network/index.html", {
-        "posts": Post.objects.all().order_by("-time")
-      })
+      return HttpResponseRedirect(reverse("index"))
    else:
-    return render(request, "network/index.html", {
-        "posts": Post.objects.all().order_by("-time")
-    })
+     posts = Post.objects.all().order_by("-time")
+     paginator = Paginator(posts, 4)
+     page_number = request.GET.get('page')
+     page_obj = paginator.get_page(page_number)
+     return render(request, "network/index.html", {
+         "posts": page_obj
+     })
 
 
 def login_view(request):
