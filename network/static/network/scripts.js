@@ -1,10 +1,12 @@
 window.addEventListener("DOMContentLoaded", (event) => {
+       
        document.querySelectorAll('#edit-button').forEach((x) => {
             x.addEventListener('click', toggleEdit);
        });
+
        document.querySelectorAll('#edit-form').forEach((x) => {
            x.addEventListener("submit", savePost);
-       })       
+       });
 });
 
 

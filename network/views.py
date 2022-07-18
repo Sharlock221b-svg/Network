@@ -5,11 +5,9 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse
 from django import forms
-from .models import Following, User, Post
+from .models import Following, User, Post, Like
 import json
 from django.contrib.auth.decorators import login_required
-from django.views.generic import ListView
-import requests
 import json
 
 
@@ -17,17 +15,34 @@ def index(request):
    if request.method == "POST":
       content = request.POST["tweet"]
       user_id = request.POST["user_id"]
+
+      if content == None or content == "":
+        return HttpResponse("Empty Tweet not allowed!!")
+      
       user = User.objects.get(id=user_id)
       q = Post(user=user,content=content)
       q.save()
+       
       return HttpResponseRedirect(reverse("index"))
    else:
+     likes = []
+     try:
+         likes = Like.objects.filter(user=request.user)
+     except:
+         print("logged out user")
+
+     list_like = []
+     for like in likes:
+        list_like.append(like.post.id)
+
+     print(list_like)
      posts = Post.objects.all().order_by("-time")
      paginator = Paginator(posts, 10)
      page_number = request.GET.get('page')
      page_obj = paginator.get_page(page_number)
      return render(request, "network/index.html", {
-         "posts": page_obj
+         "posts": page_obj,
+         "likes": list_like,
      })
 
 
@@ -83,9 +98,7 @@ def register(request):
         return render(request, "network/register.html")
 
 
-
 def profile(request,id):
-
     if request.method == "POST":
         res = request.POST["res"]
         profile = User.objects.get(pk=id)
@@ -105,10 +118,20 @@ def profile(request,id):
             profile.save()
             current_user.following -= 1
             current_user.save()
-        return HttpResponseRedirect(reverse("profile", args=(id,)))
- 
+        return HttpResponseRedirect(reverse("profile", args=(id,))) 
 
     else:
+         likes = []
+         try:
+              likes = Like.objects.filter(user=request.user)
+         except:
+              print("logged out user")
+
+         list_like = []
+         for like in likes:
+             list_like.append(like.post.id)
+
+         print(list_like)
          profile = User.objects.get(pk=id)
          posts = Post.objects.filter(user=profile).order_by("-time")
          print(posts)
@@ -130,22 +153,37 @@ def profile(request,id):
          return render(request, "network/profile.html",{
           "profile": profile,
           "posts": page_obj,
-          "val": val
+          "val": val,
+          "likes": list_like,
          })
 
 
 def following(request):
+   
+    likes = []
+    try:
+         likes = Like.objects.filter(user=request.user)
+    except:
+         print("logged out user")
+
+    list_like = []
+    for like in likes:
+        list_like.append(like.post.id)
+
+    print(list_like)
+
     list_users = Following.objects.filter(follower=request.user)
     list = []
     for x in list_users:
         list.append(x.followed)
 
-    post = Post.objects.filter(user__in=list)
+    post = Post.objects.filter(user__in=list).order_by("-time")
     paginator = Paginator(post, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, "network/posts.html", {
-        "posts": page_obj
+        "posts": page_obj,
+        "likes": list_like,
     })
 
 def savePost(request):
@@ -153,4 +191,25 @@ def savePost(request):
         data = json.loads(request.body)
         Post.objects.filter(id=data["post_id"]).update(content=data["content"])
         return HttpResponse("Updated Successfully", status=200)
+    
+@login_required(login_url="login")
+def like(request,id):
+    if request.method == "POST":
+        post = Post.objects.get(id=id)
+        user = User.objects.get(id=request.user.id)
+        post.likes += 1
+        post.save()
+        l = Like(user=user, post=post)
+        l.save()
+        return HttpResponse("Increased Likes Successfully", status=200)
+
+@login_required(login_url="login")
+def dislike(request,id):
+    if request.method == "POST":
+        post = Post.objects.get(id=id)
+        user = User.objects.get(id=request.user.id)
+        post.likes -= 1
+        post.save()
+        Like.objects.filter(post=post,user=user).delete()
+        return HttpResponse("Decreased Likes Successfully", status=200)
     
